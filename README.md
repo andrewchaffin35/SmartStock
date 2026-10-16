@@ -1,6 +1,6 @@
-# SmartStock AI
+# Replenish
 
-SmartStock AI is a local demo for small-business inventory. It tracks products, sales, incoming shipments, and stock adjustments, then calculates revenue and gross profit from those records.
+Replenish is a local inventory app for a small business. It tracks products, sales, incoming shipments, and stock adjustments, then calculates revenue and gross profit from those records.
 
 This version runs in the browser with HTML, CSS, and vanilla JavaScript. It does not use a front-end framework or a build step.
 
@@ -21,25 +21,23 @@ Chart.js is loaded from a CDN, so charts need an internet connection. If the lib
 You can also serve the folder locally:
 
 ```bash
-cd smartstock-ai
-python3 -m http.server 8080
+cd SmartStock
+python3 -m http.server 8765
 ```
 
-Then open `http://localhost:8080`.
+Then open `http://127.0.0.1:8765`. Use that address for Google sign-in. Opening the file directly does not give Google an allowed website address.
 
-## Demo sign-in
+## Sign-in
 
 Create an account with your name, business name, email, and a password of at least 8 characters. Creating the account does not open the dashboard. Sign in afterward with that email and password.
 
-You can also choose Continue with Google on the create account or log in screen. Google sign-in opens only after you add your own Google OAuth client ID to `GOOGLE_CLIENT_ID` at the top of `script.js`. In Google Cloud, allow this site under Authorized JavaScript origins. The page loads Google's sign-in script from the internet. A production app should verify Google's token on a server.
+Continue with Google is on the create account and log in screens. Google's own button appears after a web client ID is set in `GOOGLE_CLIENT_ID` in `script.js`, with this site's address allowed under Authorized JavaScript origins. A new Google sign-in starts with an empty inventory. The page loads Google's sign-in script from the internet. A production app should verify Google's token on a server.
 
 The password itself is not stored. The browser saves a salted hash and checks it locally. Someone with access to this browser's saved data could still try to guess the password, so this is not a substitute for server-side authentication. Signing out hides the dashboard and keeps the records.
 
 In Settings, choose a color to make an initials picture, or upload a photo. The photo is cropped to a square and saved with the profile in this browser.
 
-Sample products, sales, and shipments load the first time the site is opened. They stay in place when you refresh. Settings can restore the original sample. That replaces products, sales, shipments, and adjustments, and it keeps the current profile signed in.
-
-The sample figures are demo data. The dashboard calculates them from the stored records.
+A new account starts with no products, sales, or shipments, so the dashboard figures are zero until you add records. Settings can load a sample catalog. That replaces products, sales, shipments, and adjustments, and it keeps the current profile signed in.
 
 ## Import a CSV
 
@@ -51,7 +49,7 @@ Required columns:
 
 The importer accepts quoted fields, including commas inside a product name. It shows a preview before anything changes. If any row is invalid, or a SKU is repeated in the file or already in inventory, nothing is imported and the preview lists the row errors.
 
-The sample file uses the same SKUs as the built-in demo products. Importing it unchanged reports duplicate SKUs. To try a successful import, change the SKUs or remove the matching products first.
+A new account has no products, so the sample file can be imported as-is. If a SKU is already in inventory, the import stops and lists that row.
 
 Export CSV downloads the products that match the current search and filters, including rows hidden by Show more.
 

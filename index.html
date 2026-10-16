@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SmartStock AI</title>
-  <meta name="description" content="SmartStock AI helps small businesses track inventory, sales, shipments, and gross profit.">
+  <title>Replenish</title>
+  <meta name="description" content="Replenish helps small businesses track inventory, sales, shipments, and gross profit.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,7 +16,7 @@
         <rect width="32" height="32" rx="8" fill="#123C32"></rect>
         <path d="M8 10h16M8 16h12M8 22h8" fill="none" stroke="#F8FAF9" stroke-width="2.4" stroke-linecap="round"></path>
       </svg>
-      <span>SmartStock AI</span>
+      <span>Replenish</span>
     </a>
     <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
     <nav class="nav-links" id="nav-links" aria-label="Primary">
@@ -52,7 +52,7 @@
   <main id="main">
     <section class="welcome" id="view-welcome">
       <div class="welcome-copy">
-        <p class="eyebrow">SmartStock AI</p>
+        <p class="eyebrow">Replenish</p>
         <h1>Take Control of Your Inventory.</h1>
         <p class="lede">Track what you have on hand, record sales, watch incoming shipments, and estimate gross profit from real transactions. Built for small business owners who want clearer restocking decisions.</p>
         <div class="welcome-actions">
@@ -73,7 +73,7 @@
     </section>
 
     <div id="view-app" hidden>
-      <p class="demo-banner">Demo data is stored in this browser. Password checks stay on this computer until a secure server is added.</p>
+      <p class="demo-banner">Your records stay in this browser. A new account starts with an empty inventory.</p>
 
       <section class="panel" id="panel-dashboard">
         <header class="page-heading">
@@ -464,7 +464,7 @@
         <header class="page-heading">
           <div>
             <h1>Settings</h1>
-            <p>Update the picture and name shown in the header, or put the original demo records back.</p>
+            <p>Update the picture and name shown in the header.</p>
           </div>
         </header>
         <form class="settings-form" id="settings-form">
@@ -493,12 +493,12 @@
         </form>
         <section class="section-card limit-card">
           <h2>Restore demo data</h2>
-          <p>This replaces products, sales, shipments, and stock adjustments with the original sample. Your display name, business name, and email stay as they are, and you remain signed in.</p>
+          <p>This replaces your products, sales, shipments, and stock adjustments with a sample catalog. Your name, business, email, and picture stay as they are.</p>
           <button type="button" class="button button-danger" id="restore-demo">Restore demo data</button>
         </section>
         <section class="section-card limit-card">
           <h2>What this demo does not do</h2>
-          <p>Records stay in localStorage on this browser. The password itself is not saved. Only a salted hash is saved, and that check still runs in the browser. A real multi-user version needs a backend API, a database, server-side authorization, password hashing, and separate data for each business. Google sign-in also needs a server to verify Google's token.</p>
+          <p>Records stay in this browser. The password itself is not saved. Only a salted hash is saved, and that check still runs on this computer. Google sign-in uses the account Google confirms in the button. A real multi-user version needs a backend API, a database, server-side authorization, and a server check of Google's token.</p>
         </section>
       </section>
     </div>
@@ -511,10 +511,12 @@
         <button type="button" class="icon-button" data-close="create-dialog" aria-label="Close">×</button>
       </header>
       <p class="fine-print">This saves your account in this browser and then asks you to sign in. It does not open the dashboard by itself.</p>
-      <button type="button" class="button button-google" id="create-google">
-        <svg viewBox="0 0 18 18" aria-hidden="true" width="18" height="18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7A5.4 5.4 0 0 1 3.6 9c0-.6.1-1.2.3-1.7V5H.9a9 9 0 0 0 0 8l3-2.3z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
-        Continue with Google
-      </button>
+      <div id="create-google" class="google-slot">
+        <button type="button" class="button button-google" id="create-google-fallback">
+          <svg viewBox="0 0 18 18" aria-hidden="true" width="18" height="18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7A5.4 5.4 0 0 1 3.6 9c0-.6.1-1.2.3-1.7V5H.9a9 9 0 0 0 0 8l3-2.3z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
+          Continue with Google
+        </button>
+      </div>
       <p class="auth-divider">or create a password</p>
       <label class="field">Name<input type="text" id="create-name" required autocomplete="name"></label>
       <span class="field-error" id="create-name-error"></span>
@@ -541,10 +543,12 @@
         <button type="button" class="icon-button" data-close="login-dialog" aria-label="Close">×</button>
       </header>
       <p class="fine-print">Enter the email and password for this browser's account. A name alone cannot open it.</p>
-      <button type="button" class="button button-google" id="login-google">
-        <svg viewBox="0 0 18 18" aria-hidden="true" width="18" height="18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7A5.4 5.4 0 0 1 3.6 9c0-.6.1-1.2.3-1.7V5H.9a9 9 0 0 0 0 8l3-2.3z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
-        Continue with Google
-      </button>
+      <div id="login-google" class="google-slot">
+        <button type="button" class="button button-google" id="login-google-fallback">
+          <svg viewBox="0 0 18 18" aria-hidden="true" width="18" height="18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7A5.4 5.4 0 0 1 3.6 9c0-.6.1-1.2.3-1.7V5H.9a9 9 0 0 0 0 8l3-2.3z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
+          Continue with Google
+        </button>
+      </div>
       <p class="auth-divider">or use your password</p>
       <label class="field">Email<input type="email" id="login-email" required autocomplete="username"></label>
       <span class="field-error" id="login-email-error"></span>
@@ -730,7 +734,7 @@
   </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async></script>
   <script src="script.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async onload="setupGoogle()"></script>
 </body>
 </html>

@@ -356,6 +356,8 @@ h2 { font-size: 1.05rem; margin: 0; }
   gap: 10px;
 }
 .button-google:hover { background: var(--bg); }
+.google-slot { min-height: 44px; margin: 8px 0; display: flex; justify-content: center; }
+.google-slot .button-google { margin: 0; }
 .auth-divider {
   display: grid;
   grid-template-columns: 1fr auto 1fr;

@@ -1,10 +1,10 @@
 "use strict";
 
-const STORAGE_KEY = "smartstock-ai-demo";
+const STORAGE_KEY = "replenish";
 const BUSINESS_ID = "biz_demo";
 const PAGE_SIZE = 8;
-// Paste a Google OAuth client ID here to enable the Google buttons.
-// In Google Cloud, add this site's origin under Authorized JavaScript origins.
+// Web client for Sign in with Google. Authorized JavaScript origins must include
+// the exact address in the browser, such as http://127.0.0.1:8765.
 const GOOGLE_CLIENT_ID = "";
 const AVATAR_COLORS = ["#123C32", "#16A36A", "#1F2937", "#2563EB", "#7C3AED", "#DC2626", "#F59E0B", "#0F766E"];
 
@@ -114,6 +114,14 @@ function normalize(data) {
   return next;
 }
 
+function clearBooks() {
+  state.products = [];
+  state.sales = [];
+  state.shipments = [];
+  state.adjustments = [];
+  state.counters = { product: 1, sale: 1, shipment: 1, adjustment: 1 };
+}
+
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -122,10 +130,9 @@ function loadData() {
       return;
     }
   } catch (error) {
-    console.error("SmartStock could not read saved demo data.", error);
+    console.error("Replenish could not read saved records.", error);
   }
   state = emptyState();
-  populateSeed();
   saveData();
 }
 
@@ -989,7 +996,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "smartstock-inventory.csv";
+  link.download = "replenish-inventory.csv";
   document.body.append(link);
   link.click();
   link.remove();
@@ -1948,23 +1955,50 @@ function googleErrorTarget() {
   return document.getElementById("create-dialog").open ? "create-errors" : "login-errors";
 }
 
-function startGoogleSignIn() {
-  const messageId = googleErrorTarget();
-  setFormMessage(messageId, "");
-  if (!GOOGLE_CLIENT_ID) {
-    setFormMessage(messageId, "Google sign-in needs a client ID in script.js. Until then, create a password and sign in with it.");
-    return;
-  }
-  if (!window.google || !google.accounts || !google.accounts.id) {
-    setFormMessage(messageId, "Google sign-in did not load. Check your connection and try again.");
-    return;
-  }
+let googleInitialized = false;
+
+function setupGoogle() {
+  if (!GOOGLE_CLIENT_ID || googleInitialized) return;
+  if (!window.google || !google.accounts || !google.accounts.id) return;
   google.accounts.id.initialize({
     client_id: GOOGLE_CLIENT_ID,
     callback: handleGoogleCredential,
     auto_select: false,
     cancel_on_tap_outside: true
   });
+  googleInitialized = true;
+  mountGoogleButton("create-google");
+  mountGoogleButton("login-google");
+}
+
+function mountGoogleButton(id) {
+  const slot = document.getElementById(id);
+  if (!slot || slot.dataset.mounted === "true" || !googleInitialized) return;
+  slot.replaceChildren();
+  google.accounts.id.renderButton(slot, {
+    type: "standard",
+    theme: "outline",
+    size: "large",
+    text: "continue_with",
+    shape: "rectangular",
+    width: 320,
+    logo_alignment: "left"
+  });
+  slot.dataset.mounted = "true";
+}
+
+function startGoogleSignIn() {
+  const messageId = googleErrorTarget();
+  setFormMessage(messageId, "");
+  setupGoogle();
+  if (!window.google || !google.accounts || !google.accounts.id) {
+    setFormMessage(messageId, "Google sign-in did not load. Check your connection and try again.");
+    return;
+  }
+  if (!GOOGLE_CLIENT_ID) {
+    setFormMessage(messageId, "Google sign-in needs a client ID in script.js. Until then, create a password and sign in with it.");
+    return;
+  }
   google.accounts.id.prompt();
 }
 
@@ -1994,6 +2028,7 @@ function signInWithGoogle(payload) {
     return;
   }
   if (!state.profile) {
+    clearBooks();
     state.profile = {
       name: payload.name || email,
       businessName: "My business",
@@ -2001,7 +2036,8 @@ function signInWithGoogle(payload) {
       authProvider: "google",
       passwordHash: "",
       passwordSalt: "",
-      googleSub: payload.sub
+      googleSub: payload.sub,
+      avatar: null
     };
   } else {
     state.profile.googleSub = payload.sub;
@@ -2243,7 +2279,7 @@ function updateAdjustmentHint() {
   const hint = document.getElementById("adjustment-hint");
   if (type === "correction") {
     label.textContent = "Counted quantity";
-    hint.textContent = "Enter the quantity you counted. SmartStock records the difference from the current stock.";
+    hint.textContent = "Enter the quantity you counted. Replenish records the difference from the current stock.";
   } else if (type === "damage") {
     label.textContent = "Quantity";
     hint.textContent = "This quantity is removed and cannot take stock below zero.";
@@ -2407,7 +2443,7 @@ function bindEvents() {
     closeAccountMenu();
     ui.panel = "dashboard";
     renderChrome();
-    toast("Signed out. Demo records stay in this browser.");
+    toast("Signed out. Your records stay in this browser.");
   });
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".account")) closeAccountMenu();
@@ -2416,8 +2452,8 @@ function bindEvents() {
     if (event.key === "Escape") closeAccountMenu();
   });
 
-  document.getElementById("create-google").addEventListener("click", startGoogleSignIn);
-  document.getElementById("login-google").addEventListener("click", startGoogleSignIn);
+  document.getElementById("create-google-fallback").addEventListener("click", startGoogleSignIn);
+  document.getElementById("login-google-fallback").addEventListener("click", startGoogleSignIn);
   document.getElementById("create-form").addEventListener("submit", (event) => {
     event.preventDefault();
     clearErrors(["create-name", "create-business", "create-email", "create-password", "create-password-confirm"]);
@@ -2443,6 +2479,7 @@ function bindEvents() {
       setFormMessage("create-errors", "This browser already has a Google account. Continue with Google.");
       return;
     }
+    if (!state.profile) clearBooks();
     const salt = randomSalt();
     state.profile = {
       name,
@@ -2814,6 +2851,7 @@ function init() {
     Chart.defaults.color = "#6B7280";
   }
   bindEvents();
+  setupGoogle();
   renderAll();
 }
 
@@ -2828,6 +2866,7 @@ if (typeof window === "undefined" && typeof process !== "undefined" && process.a
     setItem(key, value) { memory.set(key, String(value)); }
   };
   loadData();
+  populateSeed();
   state.products.forEach((product) => console.log(`${product.sku} ${product.quantity}`));
   console.log("sales", state.sales.length, "shipments", state.shipments.length, "adjustments", state.adjustments.length);
   const negative = state.adjustments.filter((entry) => entry.quantityAfter < 0);
