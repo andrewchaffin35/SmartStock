@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartStock AI</title>
+  <meta name="description" content="SmartStock AI helps small businesses track inventory, sales, shipments, and gross profit.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a class="brand" href="#top" id="brand-link">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#123C32"></rect>
+        <path d="M8 10h16M8 16h12M8 22h8" fill="none" stroke="#F8FAF9" stroke-width="2.4" stroke-linecap="round"></path>
+      </svg>
+      <span>SmartStock AI</span>
+    </a>
+    <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    <nav class="nav-links" id="nav-links" aria-label="Primary">
+      <button type="button" class="nav-link" id="nav-dashboard" data-panel="dashboard">Dashboard</button>
+      <button type="button" class="nav-link" id="nav-inventory">Inventory</button>
+      <button type="button" class="nav-link" id="nav-sales" data-panel="sales">Sales</button>
+      <button type="button" class="nav-link" id="nav-shipments" data-panel="shipments">Shipments</button>
+      <button type="button" class="nav-link" id="nav-analytics" data-panel="analytics">Analytics</button>
+    </nav>
+    <div class="nav-actions">
+      <div id="logged-out-actions">
+        <button type="button" class="button button-secondary" id="nav-login">Log In</button>
+        <button type="button" class="button button-primary" id="nav-create">Create Account</button>
+      </div>
+      <div id="logged-in-actions" hidden>
+        <span class="business-name" id="nav-business"></span>
+        <div class="account">
+          <button type="button" class="button button-secondary" id="account-button" aria-haspopup="menu" aria-expanded="false" aria-controls="account-menu">
+            <span class="avatar" id="account-avatar" aria-hidden="true"></span>
+            <span id="account-name">Account</span>
+          </button>
+          <div class="account-menu" id="account-menu" role="menu" hidden>
+            <button type="button" role="menuitem" id="menu-settings">Settings</button>
+            <button type="button" role="menuitem" id="menu-logout">Log Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <main id="main">
+    <section class="welcome" id="view-welcome">
+      <div class="welcome-copy">
+        <p class="eyebrow">SmartStock AI</p>
+        <h1>Take Control of Your Inventory.</h1>
+        <p class="lede">Track what you have on hand, record sales, watch incoming shipments, and estimate gross profit from real transactions. Built for small business owners who want clearer restocking decisions.</p>
+        <div class="welcome-actions">
+          <button type="button" class="button button-primary" id="welcome-start">Get Started</button>
+          <button type="button" class="button button-secondary" id="welcome-login">Log In</button>
+        </div>
+        <p class="fine-print">Creating an account does not sign you in. Use your password, or continue with Google, before the dashboard opens.</p>
+      </div>
+      <div class="preview" aria-hidden="true">
+        <p class="preview-label">Preview</p>
+        <div class="preview-grid">
+          <article class="preview-card"><h2>Sales trends</h2><span class="preview-line"></span><span class="preview-line short"></span></article>
+          <article class="preview-card"><h2>Low stock</h2><span class="preview-line"></span><span class="preview-line short"></span></article>
+          <article class="preview-card"><h2>Incoming shipments</h2><span class="preview-line"></span><span class="preview-line short"></span></article>
+          <article class="preview-card"><h2>Profit forecast</h2><span class="preview-line"></span><span class="preview-line short"></span></article>
+        </div>
+      </div>
+    </section>
+
+    <div id="view-app" hidden>
+      <p class="demo-banner">Demo data is stored in this browser. Password checks stay on this computer until a secure server is added.</p>
+
+      <section class="panel" id="panel-dashboard">
+        <header class="page-heading">
+          <div>
+            <h1 id="dash-title">Dashboard</h1>
+            <p id="dash-subtitle"></p>
+          </div>
+        </header>
+
+        <div class="card-grid">
+          <article class="card" aria-labelledby="sales-card-title">
+            <header class="card-header">
+              <h2 id="sales-card-title">Sales Trends</h2>
+              <div class="segment" role="radiogroup" aria-label="Sales trend period">
+                <button type="button" role="radio" id="trend-weekly" data-range="weekly" aria-checked="false">Weekly</button>
+                <button type="button" role="radio" id="trend-monthly" data-range="monthly" aria-checked="true">Monthly</button>
+                <button type="button" role="radio" id="trend-yearly" data-range="yearly" aria-checked="false">Yearly</button>
+              </div>
+            </header>
+            <p class="metric" id="sales-total">—</p>
+            <p class="metric-label">Revenue for this period</p>
+            <p class="compare" id="sales-compare"></p>
+            <p class="compare" id="sales-year"></p>
+            <p class="direction" id="sales-direction"></p>
+            <div class="chart-box chart-box-sm">
+              <canvas id="salesTrendChart" aria-describedby="sales-summary"></canvas>
+              <p class="chart-fallback" id="sales-trend-fallback" hidden>Chart.js did not load. The revenue totals above still come from your sales records. An internet connection is required to load the chart library.</p>
+            </div>
+            <p class="chart-summary" id="sales-summary"></p>
+          </article>
+
+          <article class="card" aria-labelledby="low-stock-title">
+            <header class="card-header">
+              <h2 id="low-stock-title">Low Stock Alerts</h2>
+              <button type="button" class="text-button" id="view-all-low">View All</button>
+            </header>
+            <ul class="compact-list" id="low-stock-list"></ul>
+            <p class="empty-inline" id="low-stock-empty" hidden>No products are at or below their reorder threshold.</p>
+          </article>
+
+          <article class="card" aria-labelledby="incoming-title">
+            <header class="card-header">
+              <h2 id="incoming-title">Incoming Shipments</h2>
+              <div class="button-row">
+                <button type="button" class="text-button" id="view-all-shipments">View All Shipments</button>
+                <button type="button" class="button button-primary" id="add-shipment-card">Add Shipment</button>
+              </div>
+            </header>
+            <ul class="compact-list" id="incoming-list"></ul>
+            <p class="empty-inline" id="incoming-empty" hidden>No shipments are on the way. Add one when you place an order.</p>
+          </article>
+
+          <article class="card" aria-labelledby="forecast-title">
+            <header class="card-header">
+              <h2 id="forecast-title">Estimated Profit Forecast</h2>
+            </header>
+            <dl class="metric-list">
+              <div><dt>Estimated revenue</dt><dd id="forecast-revenue">—</dd></div>
+              <div><dt>Estimated cost of goods sold</dt><dd id="forecast-cogs">—</dd></div>
+              <div><dt>Estimated gross profit</dt><dd id="forecast-profit">—</dd></div>
+              <div><dt>Estimated gross profit margin</dt><dd id="forecast-margin">—</dd></div>
+            </dl>
+            <p class="compare" id="forecast-compare"></p>
+            <div class="chart-box chart-box-sm">
+              <canvas id="forecastChart" aria-describedby="forecast-summary"></canvas>
+              <p class="chart-fallback" id="forecast-fallback" hidden>Chart.js did not load. The estimate above is still calculated from your sales history.</p>
+            </div>
+            <p class="chart-summary" id="forecast-summary"></p>
+            <p class="fine-print" id="forecast-note"></p>
+          </article>
+        </div>
+
+        <section class="section-card" id="all-products" aria-labelledby="products-title">
+          <header class="section-header">
+            <div>
+              <h2 id="products-title">All Products</h2>
+              <p id="product-count"></p>
+            </div>
+            <div class="button-row">
+              <a class="button button-secondary" href="sample-inventory.csv" download>Sample CSV</a>
+              <button type="button" class="button button-secondary" id="import-csv">Import CSV</button>
+              <button type="button" class="button button-secondary" id="export-csv">Export CSV</button>
+              <button type="button" class="button button-primary" id="add-product">+ Add Product</button>
+              <input type="file" id="csv-file" accept=".csv,text/csv" hidden>
+            </div>
+          </header>
+          <div class="toolbar">
+            <label class="field grow">
+              <span>Search</span>
+              <input type="search" id="inventory-search" placeholder="Search by name or SKU">
+            </label>
+            <label class="field">
+              <span>Category</span>
+              <select id="inventory-category">
+                <option value="all">All categories</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Stock status</span>
+              <select id="inventory-status">
+                <option value="all">All statuses</option>
+                <option value="in">In Stock</option>
+                <option value="low">Low Stock</option>
+                <option value="out">Out of Stock</option>
+                <option value="needs-restock">Needs restock</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Sort</span>
+              <select id="inventory-sort">
+                <option value="name">Product name</option>
+                <option value="quantity">Quantity</option>
+                <option value="price">Selling price</option>
+                <option value="cost">Unit cost</option>
+              </select>
+            </label>
+            <button type="button" class="button button-secondary" id="inventory-direction" aria-label="Sort ascending">Ascending</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <caption class="sr-only">All products in inventory</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Product Name</th>
+                  <th scope="col">SKU</th>
+                  <th scope="col">Product Type</th>
+                  <th scope="col">Supplier</th>
+                  <th scope="col">Selling Price</th>
+                  <th scope="col">Unit Cost</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Stock Status</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-block" id="inventory-empty" hidden>No products match this search.</p>
+          <div class="pager">
+            <p id="inventory-page-info"></p>
+            <button type="button" class="button button-secondary" id="inventory-more" hidden>Show more</button>
+          </div>
+        </section>
+
+        <section class="section-card" aria-labelledby="recent-sales-title">
+          <header class="section-header">
+            <div>
+              <h2 id="recent-sales-title">Recent Sales</h2>
+              <p>The latest transactions stored in this browser.</p>
+            </div>
+            <div class="button-row">
+              <button type="button" class="button button-secondary" id="view-all-sales">View sales</button>
+              <button type="button" class="button button-primary" id="add-sale-dash">Add Sale</button>
+            </div>
+          </header>
+          <div class="table-scroll">
+            <table class="data-table">
+              <caption class="sr-only">Recent sales</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Product</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Revenue</th>
+                  <th scope="col">Gross profit</th>
+                </tr>
+              </thead>
+              <tbody id="recent-sales-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-block" id="recent-sales-empty" hidden>No sales have been recorded yet.</p>
+        </section>
+
+        <section class="summary-grid" aria-label="Business summary">
+          <article class="card summary-card">
+            <h2>Inventory value</h2>
+            <p class="metric" id="summary-inventory-value">—</p>
+            <p class="fine-print">Current quantity multiplied by current unit cost.</p>
+          </article>
+          <article class="card summary-card">
+            <h2>Gross profit this month</h2>
+            <p class="metric" id="summary-gross-profit">—</p>
+            <p class="fine-print">Revenue minus cost of goods sold. This is not net profit.</p>
+            <button type="button" class="text-button" id="open-analytics">Open analytics</button>
+          </article>
+        </section>
+      </section>
+
+      <section class="panel" id="panel-sales" hidden>
+        <header class="page-heading">
+          <div>
+            <h1>Sales</h1>
+            <p>Revenue is the price the customer paid. Gross profit subtracts the unit cost saved on each sale.</p>
+          </div>
+          <button type="button" class="button button-primary" id="add-sale">Add Sale</button>
+        </header>
+        <div class="toolbar">
+          <label class="field">
+            <span>Period</span>
+            <select id="sales-range">
+              <option value="month">This month</option>
+              <option value="lastMonth">Last month</option>
+              <option value="30">Last 30 days</option>
+              <option value="year">This year</option>
+              <option value="all">All time</option>
+            </select>
+          </label>
+          <label class="field grow">
+            <span>Search</span>
+            <input type="search" id="sales-search" placeholder="Search product, SKU, or order ID">
+          </label>
+        </div>
+        <div class="stat-grid">
+          <article class="card stat"><h2>Revenue</h2><p class="metric" id="sales-revenue">—</p></article>
+          <article class="card stat"><h2>Gross profit</h2><p class="metric" id="sales-profit">—</p></article>
+          <article class="card stat"><h2>Transactions</h2><p class="metric" id="sales-count">—</p></article>
+          <article class="card stat"><h2>Average transaction</h2><p class="metric" id="sales-average">—</p></article>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <caption class="sr-only">Sales history</caption>
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Product</th>
+                <th scope="col">SKU</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Price per unit</th>
+                <th scope="col">Discount note</th>
+                <th scope="col">Revenue</th>
+                <th scope="col">Cost of goods</th>
+                <th scope="col">Gross profit</th>
+                <th scope="col">Order ID</th>
+              </tr>
+            </thead>
+            <tbody id="sales-body"></tbody>
+          </table>
+        </div>
+        <p class="empty-block" id="sales-empty" hidden>No sales match this period and search.</p>
+      </section>
+
+      <section class="panel" id="panel-shipments" hidden>
+        <header class="page-heading">
+          <div>
+            <h1>Shipments</h1>
+            <p>Delivered shipments stay in history. Stock increases once, the first time a shipment is marked delivered.</p>
+          </div>
+          <button type="button" class="button button-primary" id="add-shipment">Add Shipment</button>
+        </header>
+        <label class="field filter-field">
+          <span>Status</span>
+          <select id="shipment-filter">
+            <option value="all">All statuses</option>
+            <option value="preparing">Preparing</option>
+            <option value="shipped">Shipped</option>
+            <option value="out_for_delivery">Out for Delivery</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </label>
+        <section class="section-card" aria-labelledby="incoming-page-title">
+          <h2 id="incoming-page-title">Incoming shipments</h2>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Product</th>
+                  <th scope="col">SKU</th>
+                  <th scope="col">Supplier</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Expected date</th>
+                  <th scope="col">Tracking</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Inventory</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="incoming-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-block" id="incoming-page-empty" hidden>No incoming shipments match this filter.</p>
+        </section>
+        <section class="section-card" aria-labelledby="history-title">
+          <h2 id="history-title">Delivered history</h2>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Product</th>
+                  <th scope="col">SKU</th>
+                  <th scope="col">Supplier</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Expected date</th>
+                  <th scope="col">Tracking</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Inventory</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-block" id="history-empty" hidden>No delivered shipments yet.</p>
+        </section>
+        <section class="section-card" aria-labelledby="suppliers-title">
+          <h2 id="suppliers-title">Suppliers</h2>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Supplier</th>
+                  <th scope="col">Contact</th>
+                  <th scope="col">Products</th>
+                  <th scope="col">Open shipments</th>
+                </tr>
+              </thead>
+              <tbody id="supplier-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel" id="panel-analytics" hidden>
+        <header class="page-heading">
+          <div>
+            <h1>Analytics</h1>
+            <p>Charts use the sales and inventory records in this browser. Gross profit excludes operating expenses.</p>
+          </div>
+          <label class="field">
+            <span>Range</span>
+            <select id="analytics-range">
+              <option value="90">Last 3 months</option>
+              <option value="year">This year</option>
+              <option value="all">All time</option>
+            </select>
+          </label>
+        </header>
+        <div class="stat-grid">
+          <article class="card stat"><h2>Revenue</h2><p class="metric" id="metric-revenue">—</p></article>
+          <article class="card stat"><h2>Gross profit</h2><p class="metric" id="metric-profit">—</p></article>
+          <article class="card stat">
+            <h2>Inventory value</h2>
+            <p class="metric" id="metric-inventory">—</p>
+            <p class="fine-print">Valued at current unit cost times quantity on hand.</p>
+          </article>
+          <article class="card stat">
+            <h2>Approximate turnover</h2>
+            <p class="metric" id="metric-turnover">—</p>
+            <p class="fine-print" id="turnover-note">Cost of goods sold over the last 30 days divided by current inventory value.</p>
+          </article>
+        </div>
+        <div class="analytics-grid">
+          <article class="card">
+            <h2>Revenue over time</h2>
+            <div class="chart-box"><canvas id="revenueChart" aria-describedby="revenue-summary"></canvas></div>
+            <p class="chart-summary" id="revenue-summary"></p>
+            <p class="chart-fallback" id="revenue-fallback" hidden>Chart.js did not load. The revenue total above is still calculated from your sales.</p>
+          </article>
+          <article class="card">
+            <h2>Gross profit over time</h2>
+            <div class="chart-box"><canvas id="profitChart" aria-describedby="profit-summary"></canvas></div>
+            <p class="chart-summary" id="profit-summary"></p>
+            <p class="chart-fallback" id="profit-fallback" hidden>Chart.js did not load. The gross profit total above is still calculated from your sales.</p>
+          </article>
+          <article class="card">
+            <h2>Best-selling products</h2>
+            <div class="chart-box"><canvas id="bestSellersChart" aria-describedby="best-summary"></canvas></div>
+            <p class="chart-summary" id="best-summary"></p>
+          </article>
+          <article class="card">
+            <h2>Slow-selling products</h2>
+            <div class="chart-box"><canvas id="slowSellersChart" aria-describedby="slow-summary"></canvas></div>
+            <p class="chart-summary" id="slow-summary"></p>
+          </article>
+          <article class="card">
+            <h2>Sales by product category</h2>
+            <div class="chart-box"><canvas id="categoryChart" aria-describedby="category-summary"></canvas></div>
+            <p class="chart-summary" id="category-summary"></p>
+          </article>
+          <article class="card">
+            <h2>Products with low stock</h2>
+            <ul class="compact-list" id="analytics-low-stock"></ul>
+            <p class="empty-inline" id="analytics-low-empty" hidden>No products need restocking.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-settings" hidden>
+        <header class="page-heading">
+          <div>
+            <h1>Settings</h1>
+            <p>Update the picture and name shown in the header, or put the original demo records back.</p>
+          </div>
+        </header>
+        <form class="settings-form" id="settings-form">
+          <div class="avatar-editor">
+            <div class="avatar avatar-lg" id="settings-avatar" aria-hidden="true"></div>
+            <div class="avatar-controls">
+              <p class="fine-print">Make a picture from your initials, or upload a photo. It stays in this browser.</p>
+              <div class="avatar-swatches" id="avatar-colors" role="group" aria-label="Initials colors"></div>
+              <div class="button-row">
+                <label class="button button-secondary">Upload photo<input type="file" id="avatar-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden></label>
+                <button type="button" class="button button-secondary" id="avatar-remove">Remove picture</button>
+              </div>
+              <span class="field-error" id="avatar-error"></span>
+            </div>
+          </div>
+          <label class="field">Name<input type="text" id="settings-name" required autocomplete="name"></label>
+          <span class="field-error" id="settings-name-error"></span>
+          <label class="field">Business name<input type="text" id="settings-business" required autocomplete="organization"></label>
+          <span class="field-error" id="settings-business-error"></span>
+          <label class="field">Email<input type="email" id="settings-email" required autocomplete="email"></label>
+          <span class="field-error" id="settings-email-error"></span>
+          <label class="field" id="settings-password-field">Current password<input type="password" id="settings-password" autocomplete="current-password"></label>
+          <span class="field-error" id="settings-password-error"></span>
+          <p class="form-message" id="settings-errors" role="alert"></p>
+          <button type="submit" class="button button-primary">Save profile</button>
+        </form>
+        <section class="section-card limit-card">
+          <h2>Restore demo data</h2>
+          <p>This replaces products, sales, shipments, and stock adjustments with the original sample. Your display name, business name, and email stay as they are, and you remain signed in.</p>
+          <button type="button" class="button button-danger" id="restore-demo">Restore demo data</button>
+        </section>
+        <section class="section-card limit-card">
+          <h2>What this demo does not do</h2>
+          <p>Records stay in localStorage on this browser. The password itself is not saved. Only a salted hash is saved, and that check still runs in the browser. A real multi-user version needs a backend API, a database, server-side authorization, password hashing, and separate data for each business. Google sign-in also needs a server to verify Google's token.</p>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <dialog class="modal" id="create-dialog" aria-labelledby="create-title">
+    <form id="create-form">
+      <header class="modal-header">
+        <h2 id="create-title">Create account</h2>
+        <button type="button" class="icon-button" data-close="create-dialog" aria-label="Close">×</button>
+      </header>
+      <p class="fine-print">This saves your account in this browser and then asks you to sign in. It does not open the dashboard by itself.</p>
+      <button type="button" class="button button-google" id="create-google">
+        <svg viewBox="0 0 18 18" aria-hidden="true" width="18" height="18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7A5.4 5.4 0 0 1 3.6 9c0-.6.1-1.2.3-1.7V5H.9a9 9 0 0 0 0 8l3-2.3z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
+        Continue with Google
+      </button>
+      <p class="auth-divider">or create a password</p>
+      <label class="field">Name<input type="text" id="create-name" required autocomplete="name"></label>
+      <span class="field-error" id="create-name-error"></span>
+      <label class="field">Business name<input type="text" id="create-business" required autocomplete="organization"></label>
+      <span class="field-error" id="create-business-error"></span>
+      <label class="field">Email<input type="email" id="create-email" required autocomplete="email"></label>
+      <span class="field-error" id="create-email-error"></span>
+      <label class="field">Password<input type="password" id="create-password" required autocomplete="new-password" minlength="8"></label>
+      <span class="field-error" id="create-password-error"></span>
+      <label class="field">Confirm password<input type="password" id="create-password-confirm" required autocomplete="new-password" minlength="8"></label>
+      <span class="field-error" id="create-password-confirm-error"></span>
+      <p class="form-message" id="create-errors" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" data-close="create-dialog">Cancel</button>
+        <button type="submit" class="button button-primary">Create account</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="login-dialog" aria-labelledby="login-title">
+    <form id="login-form">
+      <header class="modal-header">
+        <h2 id="login-title">Log in</h2>
+        <button type="button" class="icon-button" data-close="login-dialog" aria-label="Close">×</button>
+      </header>
+      <p class="fine-print">Enter the email and password for this browser's account. A name alone cannot open it.</p>
+      <button type="button" class="button button-google" id="login-google">
+        <svg viewBox="0 0 18 18" aria-hidden="true" width="18" height="18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.6-1.9.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7A5.4 5.4 0 0 1 3.6 9c0-.6.1-1.2.3-1.7V5H.9a9 9 0 0 0 0 8l3-2.3z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
+        Continue with Google
+      </button>
+      <p class="auth-divider">or use your password</p>
+      <label class="field">Email<input type="email" id="login-email" required autocomplete="username"></label>
+      <span class="field-error" id="login-email-error"></span>
+      <label class="field">Password<input type="password" id="login-password" required autocomplete="current-password"></label>
+      <span class="field-error" id="login-password-error"></span>
+      <p class="form-message" id="login-notice" role="status"></p>
+      <p class="form-message" id="login-errors" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" data-close="login-dialog">Cancel</button>
+        <button type="submit" class="button button-primary">Log in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal modal-wide" id="product-dialog" aria-labelledby="product-dialog-title">
+    <form id="product-form">
+      <header class="modal-header">
+        <h2 id="product-dialog-title">Add product</h2>
+        <button type="button" class="icon-button" data-close="product-dialog" aria-label="Close">×</button>
+      </header>
+      <div class="form-grid">
+        <label class="field">Product name<input type="text" id="product-name" required><span class="field-error" id="product-name-error"></span></label>
+        <label class="field">SKU number<input type="text" id="product-sku" required><span class="field-error" id="product-sku-error"></span></label>
+        <label class="field">Product type or category<input type="text" id="product-category" required><span class="field-error" id="product-category-error"></span></label>
+        <label class="field">Supplier<input type="text" id="product-supplier" required><span class="field-error" id="product-supplier-error"></span></label>
+        <label class="field">Selling price (USD)<input type="number" id="product-price" min="0" step="0.01" required><span class="field-error" id="product-price-error"></span></label>
+        <label class="field">Unit cost (USD)<input type="number" id="product-cost" min="0" step="0.01" required><span class="field-error" id="product-cost-error"></span></label>
+        <label class="field">Current stock quantity<input type="number" id="product-quantity" min="0" step="1" required><span class="field-error" id="product-quantity-error"></span></label>
+        <label class="field">Low-stock / reorder threshold<input type="number" id="product-reorder" min="0" step="1" required><span class="field-error" id="product-reorder-error"></span></label>
+        <label class="field">Target stock level (optional)<input type="number" id="product-target" min="0" step="1"><span class="field-error" id="product-target-error"></span></label>
+        <label class="field">Barcode (optional)<input type="text" id="product-barcode"><span class="field-error" id="product-barcode-error"></span></label>
+        <label class="field field-span">Supplier contact (optional)<input type="text" id="product-contact"></label>
+        <label class="field field-span">Product description (optional)<textarea id="product-description" rows="3"></textarea></label>
+      </div>
+      <p class="fine-print" id="product-quantity-note"></p>
+      <p class="form-message" id="product-errors" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" data-close="product-dialog">Cancel</button>
+        <button type="submit" class="button button-primary">Save Product</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal modal-wide" id="detail-dialog" aria-labelledby="detail-title">
+    <header class="modal-header">
+      <h2 id="detail-title">Product details</h2>
+      <button type="button" class="icon-button" data-close="detail-dialog" aria-label="Close">×</button>
+    </header>
+    <div id="detail-body"></div>
+    <div class="modal-actions">
+      <button type="button" class="button button-secondary" data-close="detail-dialog">Close</button>
+      <button type="button" class="button button-secondary" id="detail-adjust">Adjust stock</button>
+      <button type="button" class="button button-primary" id="detail-edit">Edit Product</button>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="sale-dialog" aria-labelledby="sale-title">
+    <form id="sale-form">
+      <header class="modal-header">
+        <h2 id="sale-title">Add sale</h2>
+        <button type="button" class="icon-button" data-close="sale-dialog" aria-label="Close">×</button>
+      </header>
+      <label class="field">Product<select id="sale-product" required></select></label>
+      <span class="field-error" id="sale-product-error"></span>
+      <label class="field">Quantity sold<input type="number" id="sale-quantity" min="1" step="1" required></label>
+      <span class="field-error" id="sale-quantity-error"></span>
+      <label class="field">Sale date<input type="date" id="sale-date" required></label>
+      <span class="field-error" id="sale-date-error"></span>
+      <label class="field">Actual selling price per unit (USD)<input type="number" id="sale-price" min="0" step="0.01" required></label>
+      <span class="field-error" id="sale-price-error"></span>
+      <label class="field">Order or transaction ID (optional)<input type="text" id="sale-order"></label>
+      <label class="field">Discount note (optional)<input type="text" id="sale-discount" maxlength="80"></label>
+      <p class="fine-print">The price per unit is what the customer paid. The discount note is stored for your records and does not change revenue.</p>
+      <p class="form-message" id="sale-errors" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" data-close="sale-dialog">Cancel</button>
+        <button type="submit" class="button button-primary">Record sale</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="shipment-dialog" aria-labelledby="shipment-title">
+    <form id="shipment-form">
+      <header class="modal-header">
+        <h2 id="shipment-title">Add shipment</h2>
+        <button type="button" class="icon-button" data-close="shipment-dialog" aria-label="Close">×</button>
+      </header>
+      <label class="field">Product<select id="shipment-product" required></select></label>
+      <span class="field-error" id="shipment-product-error"></span>
+      <label class="field">Supplier<input type="text" id="shipment-supplier" required></label>
+      <span class="field-error" id="shipment-supplier-error"></span>
+      <label class="field">Quantity ordered<input type="number" id="shipment-quantity" min="1" step="1" required></label>
+      <span class="field-error" id="shipment-quantity-error"></span>
+      <label class="field">Expected delivery date<input type="date" id="shipment-date" required></label>
+      <span class="field-error" id="shipment-date-error"></span>
+      <label class="field">Tracking number (optional)<input type="text" id="shipment-tracking"></label>
+      <label class="field">Initial shipment status
+        <select id="shipment-status" required>
+          <option value="preparing">Preparing</option>
+          <option value="shipped">Shipped</option>
+          <option value="out_for_delivery">Out for Delivery</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </label>
+      <p class="fine-print" id="shipment-reconcile-note"></p>
+      <p class="form-message" id="shipment-errors" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" data-close="shipment-dialog">Cancel</button>
+        <button type="submit" class="button button-primary" id="shipment-save">Save shipment</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="adjustment-dialog" aria-labelledby="adjustment-title">
+    <form id="adjustment-form">
+      <header class="modal-header">
+        <h2 id="adjustment-title">Adjust stock</h2>
+        <button type="button" class="icon-button" data-close="adjustment-dialog" aria-label="Close">×</button>
+      </header>
+      <label class="field">Product<select id="adjustment-product" required></select></label>
+      <span class="field-error" id="adjustment-product-error"></span>
+      <label class="field">Adjustment type
+        <select id="adjustment-type" required>
+          <option value="restock">Restock</option>
+          <option value="damage">Damage/Loss</option>
+          <option value="return">Return</option>
+          <option value="correction">Correction</option>
+        </select>
+      </label>
+      <label class="field"> <span id="adjustment-quantity-label">Quantity</span><input type="number" id="adjustment-quantity" min="0" step="1" required></label>
+      <span class="field-error" id="adjustment-quantity-error"></span>
+      <p class="fine-print" id="adjustment-hint"></p>
+      <label class="field">Date<input type="date" id="adjustment-date" required></label>
+      <span class="field-error" id="adjustment-date-error"></span>
+      <label class="field">Reason or notes<textarea id="adjustment-notes" rows="3" required></textarea></label>
+      <span class="field-error" id="adjustment-notes-error"></span>
+      <p class="form-message" id="adjustment-errors" role="alert"></p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" data-close="adjustment-dialog">Cancel</button>
+        <button type="submit" class="button button-primary">Save adjustment</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal modal-wide" id="csv-dialog" aria-labelledby="csv-title">
+    <header class="modal-header">
+      <h2 id="csv-title">Import CSV preview</h2>
+      <button type="button" class="icon-button" data-close="csv-dialog" aria-label="Close">×</button>
+    </header>
+    <p id="csv-summary"></p>
+    <ul class="error-list" id="csv-errors"></ul>
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Row</th>
+            <th scope="col">Product</th>
+            <th scope="col">SKU</th>
+            <th scope="col">Category</th>
+            <th scope="col">Supplier</th>
+            <th scope="col">Price</th>
+            <th scope="col">Unit cost</th>
+            <th scope="col">Stock</th>
+            <th scope="col">Reorder</th>
+          </tr>
+        </thead>
+        <tbody id="csv-preview-body"></tbody>
+      </table>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="button button-secondary" data-close="csv-dialog">Cancel</button>
+      <button type="button" class="button button-primary" id="csv-confirm">Import products</button>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="confirm-dialog" aria-labelledby="confirm-title">
+    <h2 id="confirm-title">Confirm</h2>
+    <p id="confirm-message"></p>
+    <div class="modal-actions">
+      <button type="button" class="button button-secondary" data-close="confirm-dialog">Cancel</button>
+      <button type="button" class="button button-danger" id="confirm-accept">Confirm</button>
+    </div>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async></script>
+  <script src="script.js"></script>
+</body>
+</html>

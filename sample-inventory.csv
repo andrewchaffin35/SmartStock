@@ -1,0 +1,9 @@
+Product,SKU,Category,Supplier,Price,UnitCost,Stock,ReorderThreshold
+Notebooks,NB-100,Stationery,Northline Paper,6.50,2.10,84,20
+Pens,PN-200,Stationery,Northline Paper,1.75,0.40,18,24
+Water bottles,WB-300,Drinkware,Harbor Goods,18.00,7.25,42,12
+Backpacks,BP-400,Bags,Trailform Supply,42.00,19.50,0,8
+Desk organizers,DO-500,Office,Northline Paper,14.00,5.80,27,10
+Phone chargers,PC-600,Electronics,Volt & Co,15.00,6.40,9,15
+Reusable shopping bags,SB-700,Bags,Harbor Goods,3.50,1.10,64,20
+Coffee mugs,MG-800,Drinkware,Kiln Street Ceramics,12.00,4.25,6,10
